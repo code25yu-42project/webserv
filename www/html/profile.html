@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 프로필</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .profile-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            padding: 30px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .profile-container h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .profile-image {
+            margin-bottom: 20px;
+        }
+
+        .profile-image img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #bb9f8b;
+        }
+
+        .profile-info {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .profile-info p {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .profile-info .label {
+            font-weight: bold;
+            color: #bb9f8b;
+        }
+
+        .edit-button {
+            background-color: #bb9f8b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            display: inline-block;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .edit-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <h2>내 프로필</h2>
+
+        <!-- 프로필 이미지 -->
+        <div class="profile-image">
+            <img src="https://i.namu.wiki/i/geGngQMnvmK2g3wuKU4O1uNs8Ix1HXQULk9PrnT57lHOlU4AxL9qsNCYXOOY9DIqPWtXnphq8G6NzCcvzv-ppQ.webp" alt="Profile Image" id="profile-img">
+        </div>
+
+        <!-- 프로필 정보 -->
+        <div class="profile-info">
+            <p><span class="label">이름:</span> 홍길동</p>
+            <p><span class="label">소개:</span> 안녕하세요! 저는 웹 개발을 좋아하는 개발자입니다. 항상 배우고 성장하려고 노력합니다.</p>
+        </div>
+
+        <!-- 프로필 수정 버튼 -->
+        <a href="edit_profile.html" class="edit-button">프로필 수정</a>
+    </div>
+</body>
+</html>
