@@ -5,10 +5,28 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React + TS</title>
+    <script>
+      (function () {
+        if (window.location.pathname !== '/chatroom') return;
+        var allow = null;
+        try {
+          allow = sessionStorage.getItem('wsAllowChatroomEntry');
+          if (allow === '1') {
+            sessionStorage.removeItem('wsAllowChatroomEntry');
+            return;
+          }
+        } catch (error) {}
+        localStorage.setItem('wsMainNotice', '채팅방 입장을 위해 먼저 user_name 등록이 필요합니다.');
+        window.location.replace('/main');
+      })();
+    </script>
     <script type="module" crossorigin src="/assets/index-CegT-hFV.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-DCg8jvyu.css">
+    <link rel="stylesheet" href="/assets/server-monitor.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
+    <script src="/assets/server-monitor.js"></script>
+
   </body>
 </html>
