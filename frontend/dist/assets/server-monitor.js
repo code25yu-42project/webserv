@@ -195,7 +195,7 @@
       url: normalizedUrl,
       detail: detail,
       category: category,
-      timeText: now.toLocaleTimeString(),
+      timeText: now.toLocaleTimeString("en-US"),
       statusCode: options.statusCode || null,
       durationMs: options.durationMs || null,
       bodyPreview: bodyPreview
@@ -251,15 +251,15 @@
 
         let detail = '';
         if (normalizedUrl.includes('/files') && method === 'POST') {
-          detail = '📤 파일 업로드';
+          detail = '📤 File Upload';
         } else if (normalizedUrl.includes('/download')) {
-          detail = '📥 파일 다운로드';
+          detail = '📥 File Download';
         } else if (normalizedUrl.includes('/files') && method === 'DELETE') {
-          detail = '🗑️ 파일 삭제';
+          detail = '🗑️ File Delete';
         } else if (normalizedUrl.includes('/comments') && method === 'POST') {
-          detail = '💬 메시지 업로드';
+          detail = '💬 Message Post';
         } else if (normalizedUrl.includes('/comments') && method === 'DELETE') {
-          detail = '🗑️ 메시지 삭제';
+          detail = '🗑️ Message Delete';
         }
 
         const resBodyPreview = formatBodyPreview(responseText, false);
@@ -325,15 +325,15 @@
 
         let detail = '';
         if (normalizedResUrl.includes('/files') && methodName === 'POST') {
-          detail = '📤 파일 업로드';
+          detail = '📤 File Upload';
         } else if (normalizedResUrl.includes('/download')) {
-          detail = '📥 파일 다운로드';
+          detail = '📥 File Download';
         } else if (normalizedResUrl.includes('/files') && methodName === 'DELETE') {
-          detail = '🗑️ 파일 삭제';
+          detail = '🗑️ File Delete';
         } else if (normalizedResUrl.includes('/comments') && methodName === 'POST') {
-          detail = '💬 메시지 업로드';
+          detail = '💬 Message Post';
         } else if (normalizedResUrl.includes('/comments') && methodName === 'DELETE') {
-          detail = '🗑️ 메시지 삭제';
+          detail = '🗑️ Message Delete';
         }
 
         const resBodyPreview = formatBodyPreview(this.responseText || '', false);
@@ -442,12 +442,12 @@
       '      <p class="ws-main-hero__eyebrow">42 WEB SERVER</p>',
       '      <h1 class="ws-main-center__title">webserv Control Lounge</h1>',
       '      <p class="ws-main-center__desc">',
-      '        요청이 들어오고 응답이 나가는 과정을 실시간으로 관찰하고, ',
-      '        채팅 기능으로 서버 동작을 바로 검증할 수 있는 테스트 공간입니다.',
+      '        Observe requests and responses in real time, ',
+      '        This is a test space to verify server behavior immediately via chat.',
       '      </p>',
       '      <div class="ws-main-entry">',
-      '        <input class="ws-main-entry__input" type="text" placeholder="닉네임 입력" />',
-      '        <button class="ws-main-center__btn ws-main-entry__btn" type="button">입장</button>',
+      '        <input class="ws-main-entry__input" type="text" placeholder="Enter nickname" />',
+      '        <button class="ws-main-center__btn ws-main-entry__btn" type="button">Enter</button>',
       '      </div>',
       '      <p class="ws-main-entry__error" style="display:none;"></p>',
       '    </div>',
@@ -502,14 +502,14 @@
         });
 
         if (!response.ok) {
-          throw new Error('user_name 등록 요청이 실패했습니다.');
+          throw new Error('Failed to register user_name.');
         }
 
         const payload = await response.json();
         const userId = payload && payload.body ? payload.body.user_id : null;
 
         if (userId == null || userId === '') {
-          throw new Error('등록된 user_id를 받지 못했습니다.');
+          throw new Error('Failed to receive registered user_id.');
         }
 
         localStorage.setItem('userInfo', JSON.stringify(Number(userId)));
@@ -532,7 +532,7 @@
         allowNextChatroomEntry();
         window.location.href = '/chatroom';
       } catch (error) {
-        errorBox.textContent = error && error.message ? error.message : '등록에 실패했습니다.';
+        errorBox.textContent = error && error.message ? error.message : 'Registration failed.';
         errorBox.style.display = 'block';
       } finally {
         entryButton.disabled = false;
@@ -554,13 +554,13 @@
     const hasAllowance = consumeChatroomEntryAllowance();
 
     if (!hasAllowance && !hasValidUserId()) {
-      localStorage.setItem('wsMainNotice', '채팅방 입장을 위해 먼저 user_name 등록이 필요합니다.');
+      localStorage.setItem('wsMainNotice', 'Please register your username first to enter the chatroom.');
       window.location.replace('/main');
       return;
     }
 
     if (!hasValidUserId()) {
-      localStorage.setItem('wsMainNotice', '채팅방 입장을 위해 먼저 user_name 등록이 필요합니다.');
+      localStorage.setItem('wsMainNotice', 'Please register your username first to enter the chatroom.');
       window.location.replace('/main');
       return;
     }
@@ -583,7 +583,7 @@
         '  <h2 class="ws-chat-header__title">Chatroom Mission Control</h2>',
         '  <span class="ws-chat-header__chip">real-time test</span>',
         '</div>',
-        '<p class="ws-chat-header__desc">메시지/파일 액션과 서버 로그를 나란히 보면서 동작을 검증하세요.</p>'
+        '<p class="ws-chat-header__desc">Verify behavior by viewing message/file actions alongside server logs.</p>'
       ].join('');
 
       pageRoot.insertBefore(header, chatContainer);
@@ -614,7 +614,7 @@
     if (showSelfNotice && !chatNoticeState.selfJoinShown) {
       const currentUserId = getStoredUserId();
       const userName = getStoredUserName() || (currentUserId != null ? ('user#' + String(currentUserId)) : 'user');
-      appendChatNotice(userName + ' 님이 입장하였습니다.', 'join');
+      appendChatNotice(userName + ' joined.', 'join');
       chatNoticeState.selfJoinShown = true;
       localStorage.removeItem('wsShowSelfJoinNotice');
     }
@@ -627,7 +627,7 @@
 
     const notice = document.createElement('div');
     notice.className = 'ws-chat-notice ' + (type === 'leave' ? 'ws-chat-notice--leave' : 'ws-chat-notice--join');
-    const timeText = new Date().toLocaleTimeString();
+    const timeText = new Date().toLocaleTimeString("en-US");
     notice.textContent = '[' + timeText + '] ' + message;
 
     display.appendChild(notice);
@@ -672,13 +672,13 @@
 
     nextSet.forEach(function (id) {
       if (!chatNoticeState.users.has(id)) {
-        appendChatNotice(names.get(id) + ' 님이 입장하였습니다.', 'join');
+        appendChatNotice(names.get(id) + ' joined.', 'join');
       }
     });
 
     chatNoticeState.users.forEach(function (id) {
       if (!nextSet.has(id)) {
-        appendChatNotice('user#' + id + ' 님이 퇴장했습니다.', 'leave');
+        appendChatNotice('user#' + id + ' left.', 'leave');
       }
     });
 

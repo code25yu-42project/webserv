@@ -206,7 +206,7 @@ body .input-change input[type="file"]::file-selector-button:hover {
 }
 
 body .input-change button,
-body button[style*="보내기"] {
+body button[style*="Send"] {
   position: static !important;
   right: auto !important;
   border: 1px solid rgba(101, 234, 180, 0.5) !important;
@@ -224,13 +224,13 @@ body button[style*="보내기"] {
 }
 
 body .input-change button:hover,
-body button[style*="보내기"]:hover {
+body button[style*="Send"]:hover {
   background: rgba(101, 234, 180, 0.28) !important;
   border-color: rgba(101, 234, 180, 0.7) !important;
   box-shadow: 0 0 8px rgba(101, 234, 180, 0.35) !important;
 }
 
-body textarea[placeholder*="메시지"] {
+body textarea[placeholder*="Enter message"] {
   width: 100% !important;
   min-height: 84px !important;
   border: 1px solid rgba(126, 236, 255, 0.28) !important;
@@ -246,7 +246,48 @@ body textarea[placeholder*="메시지"] {
   line-height: 1.5 !important;
 }
 
-body textarea[placeholder*="메시지"]:focus {
+body textarea[placeholder*="Enter message"]:focus {
   border-color: rgba(126, 236, 255, 0.45) !important;
   box-shadow: 0 0 8px rgba(126, 236, 255, 0.2) !important;
+}
+
+/* Custom File Input Styling */
+.chat-file-input {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 12px !important;
+  border: 1px solid rgba(126, 236, 255, 0.28) !important;
+  border-radius: 8px !important;
+  background: rgba(8, 12, 23, 0.7) !important;
+  cursor: pointer !important;
+  flex: 1 !important;
+}
+
+.chat-file-input__btn {
+  padding: 6px 14px !important;
+  border: 1px solid rgba(101, 234, 180, 0.5) !important;
+  border-radius: 6px !important;
+  background: rgba(101, 234, 180, 0.15) !important;
+  color: #cbffe8 !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  transition: all 0.2s !important;
+  white-space: nowrap !important;
+}
+
+.chat-file-input__btn:hover {
+  background: rgba(101, 234, 180, 0.28) !important;
+  border-color: rgba(101, 234, 180, 0.7) !important;
+  box-shadow: 0 0 8px rgba(101, 234, 180, 0.35) !important;
+}
+
+.chat-file-input__name {
+  color: #a9d3f0 !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex: 1 !important;
 }

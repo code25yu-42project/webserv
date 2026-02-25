@@ -36,14 +36,14 @@
     actions.className = 'chat-inline-actions';
 
     if (!message.is_comment && typeof props.onDownload === 'function') {
-      actions.appendChild(createActionButton('다운로드', 'is-download', () => {
+      actions.appendChild(createActionButton('Download', 'is-download', () => {
         props.onDownload(message.content_id);
       }));
     }
 
     if (props.onFurther && typeof props.onDelete === 'function') {
-      actions.appendChild(createActionButton('삭제', 'is-delete', () => {
-        if (window.confirm('정말 삭제하시겠습니까?')) {
+      actions.appendChild(createActionButton('Delete', 'is-delete', () => {
+        if (window.confirm('Are you sure you want to delete?')) {
           props.onDelete(message);
         }
       }));
@@ -64,7 +64,7 @@
 
     if (!message.is_comment) {
       const label = messageBox.querySelector('span');
-      if (label && label.textContent && label.textContent.includes('파일을 업로드하였습니다')) {
+      if (label && label.textContent && label.textContent.includes('File uploaded.')) {
         label.classList.add('chat-file-message-label');
       }
     }
