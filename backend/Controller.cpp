@@ -99,7 +99,8 @@ bool	Controller::createRedirectResponse() {
 		m_model.createResponseHeaders(m_accept.request, m_accept.response, headers, status);
 		return (true);
 	}
-	m_accept.response.setStatusCode(status);
+	if (!status.empty())
+		m_accept.response.setStatusCode(status);
 	return (false);
 }
 
@@ -145,7 +146,8 @@ bool	Controller::createAutoIndexResponse() {
 		m_model.createResponseHeaders(m_accept.request, m_accept.response, headers, "");
 		return (true);
 	}
-	m_accept.response.setStatusCode(status);
+	if (!status.empty())
+		m_accept.response.setStatusCode(status);
 	return (false);
 }
 
@@ -155,7 +157,7 @@ bool	Controller::createIndexResponse() {
 
 	// std::cout << "M_URI:" << m_uri << std::endl;
 	if (m_loc_config.hasIndex(m_uri, path, status) == true) {
-		// if (m_accept.response.getStatusCode() == m_http_utils.getStatus(OK_200))
+		if (m_accept.response.getStatusCode() == m_http_utils.getStatus(OK_200) && !status.empty())
 			m_accept.response.setStatusCode(status);
 		// std::cout << ">> INDEX: " << m_accept.response.getStatusCode() <<  std::endl;
 		// std::cout << "path: " << path << std::endl;
@@ -247,7 +249,14 @@ void	Controller::createErrPageResponse(std::string status) {
 			if (!m_uri.find("/api")) {
 				location_header = m_http_utils.getHeader(LOCATION);
 				headers[location_header] = err_page_uri;
-				m_accept.response.setRedirect(m_view.redirectToJson(err_page_uri));	
+				headers[m_http_utils.getHeader(CONTENT_TYPE)] = "application/json";
+				m_accept.response.setBody(
+					"{\n\t\"error\": {\n\t\t\"status\": \"" + m_accept.response.getStatusCode() +
+					"\",\n\t\t\"message\": \"" +
+					m_http_utils.getStatusMessage(m_http_utils.getEnumFromStatus(m_accept.response.getStatusCode())) +
+					"\"\n\t}\n}"
+				);
+				m_accept.response.setRedirect(m_view.redirectToJson(err_page_uri));
 				m_model.createResponseHeaders(m_accept.request, m_accept.response, headers, m_accept.response.getStatusCode());
 			} else {
 				location_header = m_http_utils.getHeader(LOCATION);

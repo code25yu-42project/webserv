@@ -406,7 +406,7 @@ void	Server::getSessionForUsersRegister(t_accept &accept_info, SessionManager &s
 	sessionid = session.extractSessionId(cookie);
 	if (sessionid.empty() || session.isValidSessionID(sessionid) == false) {
 		accept_info.sessionid = session.createSession(data);
-		accept_info.response.addHeader(m_http_utils.getHeader(SET_COOKIE), "sessionid=" + accept_info.sessionid + "; Max-Age=3600; Path=/; HttpOnly" );
+		accept_info.response.addHeader(m_http_utils.getHeader(SET_COOKIE), session.getSetCookieHeaderValue(accept_info.sessionid));
 		session.setSessionData(accept_info.sessionid, accept_info.response.getBody());
 	} else
 		accept_info.sessionid = sessionid;

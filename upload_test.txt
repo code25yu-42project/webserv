@@ -1,5 +1,0 @@
-this
-is
-upload
-test
-file.

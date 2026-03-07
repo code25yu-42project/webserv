@@ -1,6 +1,7 @@
 #include "SessionManager.hpp"
+#include <sstream>
 
-const int SESSION_TIMEOUT = 60 * 1;
+const int SESSION_TIMEOUT = 60 * 60;
 const std::string SESSIONID_KEY = "sessionid=";
 
 /* ************************************************************************** */
@@ -196,7 +197,10 @@ std::string	SessionManager::setSessionId(std::string cookie) {
 }
 
 std::string	SessionManager::getSetCookieHeaderValue(std::string sessionid) {
-	return (SESSIONID_KEY + sessionid + "; Max-Age=3600; Path=/; HttpOnly");
+	std::stringstream	timeout;
+
+	timeout << SESSION_TIMEOUT;
+	return (SESSIONID_KEY + sessionid + "; Max-Age=" + timeout.str() + "; Path=/; HttpOnly");
 	// m_accept.response.addHeader(HttpConst::HTTP_SET_COOKIE, "", "Secure");
 	// m_accept.response.addHeader(HttpConst::HTTP_SET_COOKIE, "SameSite", "None;");
 }

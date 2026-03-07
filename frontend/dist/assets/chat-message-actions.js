@@ -93,11 +93,54 @@
     });
   };
 
+  const isUploadUrl = (url) => typeof url === 'string' && url.includes('/api/chatroom/files');
+
+  const markUploadStart = (url) => {
+    if (!isUploadUrl(url)) return false;
+    const current = Number(window.__wsPendingUploadCount || 0);
+    window.__wsPendingUploadCount = current + 1;
+    return true;
+  };
+
+  const markUploadEnd = (tracked) => {
+    if (!tracked) return;
+    const current = Number(window.__wsPendingUploadCount || 0);
+    window.__wsPendingUploadCount = current > 0 ? current - 1 : 0;
+  };
+
+  const hasDraftMessage = () => {
+    const textarea = document.querySelector('.chat-container textarea, textarea');
+    return !!(textarea && typeof textarea.value === 'string' && textarea.value.trim().length > 0);
+  };
+
+  const hasSelectedFile = () => {
+    const input = document.querySelector('.input-change input[type="file"]');
+    return !!(input instanceof HTMLInputElement && input.files && input.files.length > 0);
+  };
+
+  const shouldBlockNavigation = () => {
+    return hasDraftMessage() || hasSelectedFile() || Number(window.__wsPendingUploadCount || 0) > 0;
+  };
+
+  const installConditionalNavigationGuard = () => {
+    if (window.__wsConditionalLeaveGuardInstalled) return;
+    window.__wsConditionalLeaveGuardInstalled = true;
+
+    const bypassWhenSafe = (event) => {
+      if (shouldBlockNavigation()) return;
+      event.stopImmediatePropagation();
+      if (event.type === 'beforeunload') {
+        event.returnValue = undefined;
+      }
+    };
+
+    window.addEventListener('beforeunload', bypassWhenSafe, true);
+    window.addEventListener('popstate', bypassWhenSafe, true);
+  };
+
   const installUploadReset = () => {
     if (window.__wsUploadResetInstalled) return;
     window.__wsUploadResetInstalled = true;
-
-    const isUploadUrl = (url) => typeof url === 'string' && url.includes('/api/chatroom/files');
 
     const originalOpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url, ...rest) {
@@ -107,7 +150,9 @@
 
     const originalSend = XMLHttpRequest.prototype.send;
     XMLHttpRequest.prototype.send = function (...args) {
+      const tracked = markUploadStart(this.__wsUploadUrl);
       this.addEventListener('loadend', () => {
+        markUploadEnd(tracked);
         if (isUploadUrl(this.__wsUploadUrl) && this.status >= 200 && this.status < 300) {
           clearSelectedFiles();
         }
@@ -118,16 +163,22 @@
     if (typeof window.fetch === 'function') {
       const originalFetch = window.fetch;
       window.fetch = async (...args) => {
-        const response = await originalFetch(...args);
         const requestUrl = typeof args[0] === 'string'
           ? args[0]
           : (args[0] && typeof args[0].url === 'string' ? args[0].url : '');
+        const tracked = markUploadStart(requestUrl);
 
-        if (isUploadUrl(requestUrl) && response && response.ok) {
-          clearSelectedFiles();
+        try {
+          const response = await originalFetch(...args);
+
+          if (isUploadUrl(requestUrl) && response && response.ok) {
+            clearSelectedFiles();
+          }
+
+          return response;
+        } finally {
+          markUploadEnd(tracked);
         }
-
-        return response;
       };
     }
   };
@@ -170,6 +221,7 @@
   };
 
   try {
+    installConditionalNavigationGuard();
     installUploadReset();
     initObserver();
   } catch (error) {

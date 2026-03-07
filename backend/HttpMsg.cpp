@@ -523,7 +523,7 @@ std::string HttpMsg::mergeHttpMsg(t_msg_type type) {
 		m_body = full_body;
 	}
 	size << m_body.size();
-	setHeader(m_http_utils.getHeader(CONTENT_LENGTH), size.str());
+	addHeader(m_http_utils.getHeader(CONTENT_LENGTH), size.str());
 	if (type == REQUEST)
 		http_msg << m_startline[m_http_utils.getStartline(METHOD)] + " " + \
 					m_startline[m_http_utils.getStartline(URI)] + " " + \

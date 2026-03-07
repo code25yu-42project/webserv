@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>5xx Error</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f7f7f8;
+      color: #1f2937;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      width: min(520px, 92vw);
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 28px;
+      box-sizing: border-box;
+    }
+    h1 { margin: 0 0 12px; font-size: 28px; }
+    p { margin: 8px 0; line-height: 1.5; }
+    a {
+      display: inline-block;
+      margin-top: 14px;
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: #111827;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>5xx Server Error</h1>
+    <p>An internal server error occurred.</p>
+    <p>Please try again later or return to the main page.</p>
+    <a href="/main">Return to the main page</a>
+  </main>
+</body>
+</html>
