@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Ports used by webserv
-PORTS=(2424 4242)
+PORTS=(8080 8081)
 
 echo "=== Checking and killing processes on ports ==="
 

@@ -367,6 +367,18 @@
     return window.location.pathname || '';
   }
 
+  function isDirRoutePath(path) {
+    return path === '/dir' || path.indexOf('/dir/') === 0;
+  }
+
+  function syncRouteBodyClass() {
+    if (!document.body) return;
+    const path = routePath();
+    document.body.classList.toggle('ws-route-main', path === '/main');
+    document.body.classList.toggle('ws-route-chatroom', path === '/chatroom');
+    document.body.classList.toggle('ws-route-dir', isDirRoutePath(path));
+  }
+
   function getStoredUserName() {
     const raw = localStorage.getItem('wsUserName');
     if (!raw) return '';
@@ -620,6 +632,233 @@
     }
   }
 
+  function renderDirLayout() {
+    const root = document.getElementById('root');
+    if (!root) return;
+
+    const isDirRoute = isDirRoutePath(routePath());
+    root.classList.toggle('ws-dir-page', isDirRoute);
+    if (!isDirRoute) return;
+
+    const title = root.querySelector('.dir-subject');
+    const table = root.querySelector('.directory-table');
+    if (title) title.classList.add('ws-dir-subject');
+    if (table) table.classList.add('ws-dir-table');
+
+    if (title && table) {
+      let shell = root.querySelector('.ws-dir-shell');
+      if (!shell) {
+        shell = document.createElement('section');
+        shell.className = 'ws-dir-shell ws-main-center__box';
+
+        const header = document.createElement('header');
+        header.className = 'ws-dir-header';
+        header.innerHTML = [
+          '<p class="ws-dir-header__eyebrow">42 WEB SERVER</p>',
+          '<div class="ws-dir-header__top">',
+          '  <h1 class="ws-dir-header__title">Directory Mission Panel</h1>',
+          '  <span class="ws-dir-header__chip">autoindex</span>',
+          '</div>',
+          '<p class="ws-dir-header__desc">Browse server-side directories and verify autoindex response behavior in real time.</p>'
+        ].join('');
+
+        if (title.parentElement) {
+          title.parentElement.insertBefore(shell, title);
+        } else {
+          root.appendChild(shell);
+        }
+        shell.appendChild(header);
+      }
+
+      if (!shell.contains(title)) shell.appendChild(title);
+      if (!shell.contains(table)) shell.appendChild(table);
+    }
+
+    const nodes = root.querySelectorAll('div');
+    for (let idx = 0; idx < nodes.length; idx++) {
+      const node = nodes[idx];
+      if ((node.textContent || '').trim() === 'Loading' || (node.textContent || '').trim() === 'Loading...') {
+        node.classList.add('ws-dir-loading', 'ws-main-center__box');
+      }
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function recoverDirErrorView() {
+    const path = routePath();
+    if (!isDirRoutePath(path)) return;
+
+    const root = document.getElementById('root');
+    if (!root) return;
+
+    const text = (root.textContent || '').toLowerCase();
+    const hasDirError = text.indexOf('requested folder path does not exist') !== -1;
+    if (!hasDirError) return;
+
+    if (root.dataset.wsDirRecovering === '1') return;
+    root.dataset.wsDirRecovering = '1';
+
+    fetch('/api' + path, { method: 'GET' })
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error('Failed to fetch /api' + path);
+        }
+        return response.json();
+      })
+      .then(function (payload) {
+        const filelist = payload && Array.isArray(payload.filelist) ? payload.filelist : [];
+        if (!filelist.length) return;
+
+        const rows = filelist.map(function (item) {
+          const fileName = escapeHtml(item && item.file_name);
+          const fileDate = Number(item && item.file_date);
+          const dateText = Number.isFinite(fileDate)
+            ? new Date(fileDate * 1000).toLocaleString('en-US')
+            : '-';
+          const fileSize = escapeHtml(item && item.file_size);
+          const icon = fileName.endsWith('/') ? '📁' : '📄';
+
+          return [
+            '<tr>',
+            '  <td class="name">' + icon + ' ' + fileName + '</td>',
+            '  <td class="info">' + escapeHtml(dateText) + '</td>',
+            '  <td class="size">' + fileSize + '</td>',
+            '</tr>'
+          ].join('');
+        }).join('');
+
+        root.innerHTML = [
+          '<h2 class="dir-subject">📁 Directory Browser</h2>',
+          '<table class="directory-table">',
+          '  <thead>',
+          '    <tr>',
+          '      <th>File Name</th>',
+          '      <th>Last Modified</th>',
+          '      <th>Size</th>',
+          '    </tr>',
+          '  </thead>',
+          '  <tbody>',
+               rows,
+          '  </tbody>',
+          '</table>'
+        ].join('');
+
+        renderDirLayout();
+      })
+      .catch(function () {
+      })
+      .finally(function () {
+        delete root.dataset.wsDirRecovering;
+      });
+  }
+
+  function getDirEntryNameFromRow(row) {
+    const nameCell = row && row.querySelector ? row.querySelector('.name') : null;
+    if (!nameCell) return '';
+
+    let text = (nameCell.textContent || '').trim();
+    text = text.replace(/^📁\s*/, '').replace(/^📄\s*/, '').trim();
+    return text;
+  }
+
+  function buildDirNextPath(currentPath, entryName) {
+    if (!entryName) return null;
+
+    const normalizedCurrent = (currentPath || '/dir').replace(/\/+$/, '') || '/dir';
+    const parts = normalizedCurrent.replace(/^\/+|\/+$/g, '').split('/');
+    if (!parts.length || parts[0] !== 'dir') return null;
+
+    if (entryName === './' || entryName === '.') {
+      return normalizedCurrent;
+    }
+
+    if (entryName === '../' || entryName === '..') {
+      if (parts.length > 1) parts.pop();
+      return '/' + parts.join('/');
+    }
+
+    if (!/\/$/.test(entryName)) {
+      return null;
+    }
+
+    const segmentRaw = entryName.replace(/\/$/, '').trim();
+    if (!segmentRaw) return normalizedCurrent;
+    if (segmentRaw === '.') return normalizedCurrent;
+    if (segmentRaw === '..') {
+      if (parts.length > 1) parts.pop();
+      return '/' + parts.join('/');
+    }
+
+    const segment = encodeURIComponent(segmentRaw);
+    return '/' + parts.concat(segment).join('/');
+  }
+
+  function decorateDirRows(table) {
+    if (!table) return;
+    const rows = table.querySelectorAll('tbody tr');
+
+    for (let idx = 0; idx < rows.length; idx++) {
+      const row = rows[idx];
+      const entryName = getDirEntryNameFromRow(row);
+      const nextPath = buildDirNextPath(routePath(), entryName);
+      const clickable = !!nextPath && nextPath !== routePath();
+
+      if (clickable) {
+        row.classList.add('ws-dir-row--clickable');
+        row.setAttribute('tabindex', '0');
+        row.setAttribute('role', 'button');
+      } else {
+        row.classList.remove('ws-dir-row--clickable');
+        row.removeAttribute('tabindex');
+        row.removeAttribute('role');
+      }
+    }
+  }
+
+  function bindDirTableNavigation(root) {
+    const table = root && root.querySelector ? root.querySelector('.directory-table') : null;
+    if (!table) return;
+
+    decorateDirRows(table);
+
+    if (table.dataset.wsDirNavBound === '1') {
+      return;
+    }
+    table.dataset.wsDirNavBound = '1';
+
+    function navigateByRow(row) {
+      const entryName = getDirEntryNameFromRow(row);
+      const nextPath = buildDirNextPath(routePath(), entryName);
+      if (!nextPath || nextPath === routePath()) return;
+
+      appendLog('USER', 'DIR_NAV', nextPath, 'directory click');
+      window.location.href = nextPath;
+    }
+
+    table.addEventListener('click', function (event) {
+      const row = event.target && event.target.closest ? event.target.closest('tr') : null;
+      if (!row || !table.contains(row) || !row.classList.contains('ws-dir-row--clickable')) return;
+      navigateByRow(row);
+    });
+
+    table.addEventListener('keydown', function (event) {
+      const row = event.target && event.target.closest ? event.target.closest('tr') : null;
+      if (!row || !table.contains(row) || !row.classList.contains('ws-dir-row--clickable')) return;
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        navigateByRow(row);
+      }
+    });
+  }
+
   function appendChatNotice(message, type) {
     if (routePath() !== '/chatroom') return;
     const display = document.querySelector('.chat-display');
@@ -686,9 +925,17 @@
   }
 
   function renderRouteLayouts() {
+    syncRouteBodyClass();
     syncGlobalHeaderVisibility();
     renderMainCenter();
     renderChatroomLayout();
+    renderDirLayout();
+    recoverDirErrorView();
+
+    const root = document.getElementById('root');
+    if (isDirRoutePath(routePath()) && root) {
+      bindDirTableNavigation(root);
+    }
   }
 
   function installRouteHooks() {
